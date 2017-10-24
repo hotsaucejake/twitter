@@ -44,12 +44,12 @@ Trait MediaTrait {
 
 		if ( !array_key_exists( 'media_file', $parameters ) )
 		{
-			throw new Exception( 'Parameter required missing : media_file' );
+			throw new BadMethodCallException( 'Parameter required missing : media_file' );
 		}
 
 		if ( !file_exists($parameters['media_file']) )
 		{
-			throw new Exception('File does not exist : ' . $parameters['media_file'] );
+			throw new BadMethodCallException('File does not exist : ' . $parameters['media_file'] );
 		}
 
 		// Initialize upload
@@ -69,7 +69,7 @@ Trait MediaTrait {
 
 		if ( !$handle = fopen( $parameters['media_file'], 'rb' ) )
 		{
-			throw new Exception( 'Error opening file : ' . $parameters['media_file'] );
+			throw new BadMethodCallException( 'Error opening file : ' . $parameters['media_file'] );
 		}
 
 		$i = 0;
