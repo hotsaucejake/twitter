@@ -1,70 +1,31 @@
-# Twitter
+# Laravel Twitter
 
-Twitter API for Laravel 4/5
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md) 
+[![Build Status](https://img.shields.io/travis/atymic/twitter/master.svg?style=flat-square)](https://travis-ci.org/atymic/twitter) 
+[![StyleCI](https://styleci.io/repos/11009743/shield)](https://styleci.io/repos/11009743) 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/thujohn/twitter.svg?style=flat-square)](https://packagist.org/packages/thujohn/twitter) 
+[![Total Downloads](https://img.shields.io/packagist/dt/thujohn/twitter.svg?style=flat-square)](https://packagist.org/packages/thujohn/twitter) 
+![GitHub Release Date](https://img.shields.io/github/release-date/atymic/twitter?label=latest%20release&style=flat-square)
+
+Twitter API for Laravel 5.5+, 6.x and 7.x
 
 You need to create an application and create your access token in the [Application Management](https://apps.twitter.com/).
 
-[![Build Status](https://travis-ci.org/thujohn/twitter.png?branch=master)](https://travis-ci.org/thujohn/twitter)
+### Sponsors
 
+[![PHP Hosting](https://cdn2.amezmo.net/assets/blue-logo.svg)](https://www.amezmo.com)  
+<sub>It's like forge, but better!</sub> 
 
 ## Installation
 
-Add `thujohn/twitter` to `composer.json`.
-```
-"thujohn/twitter": "~2.0"
-```
-
-Run `composer update` to pull down the latest version of Twitter.
-
-Or run
 ```
 composer require thujohn/twitter
 ```
 
-Now open up `/config/app.php` and add the service provider to your `providers` array.
-```php
-'providers' => [
-	Thujohn\Twitter\TwitterServiceProvider::class,
-]
-```
-
-Now add the alias.
-```php
-'aliases' => [
-	'Twitter' => Thujohn\Twitter\Facades\Twitter::class,
-]
-```
-
-
-## Upgrading from 1.x.x
-
-The package now requires PHP >= 5.4.0
-
-Facade has changed (Thujohn\Twitter\Facades\Twitter)
-
-Config file has been updated (debug, UPLOAD_URL, ACCESS_TOKEN_URL, REQUEST_TOKEN_URL)
-
-set_new_config() has been renamed reconfig()
-
-
 ## Configuration 
 
-### Laravel 4
+Just set the below environment variables in your `.env`. 
 
-Run `php artisan config:publish thujohn/twitter` and modify the config file with your own informations.
-```
-/app/config/packages/thujohn/twitter/config.php
-```
-Also, make sure to remove the env in the config file and replace it with your information.
-
-
-### Laravel 5
-
-Run `php artisan vendor:publish --provider="Thujohn\Twitter\TwitterServiceProvider"` and modify the config file with your own information.
-```
-/config/ttwitter.php
-```
-With Laravel 5, it's simple to edit the config.php file - in fact you don't even need to touch it! Just add the following to your .env file and you'll be on your way:
 ```
 TWITTER_CONSUMER_KEY=
 TWITTER_CONSUMER_SECRET=
@@ -72,8 +33,39 @@ TWITTER_ACCESS_TOKEN=
 TWITTER_ACCESS_TOKEN_SECRET=
 ```
 
+### Advanced configuration
 
-## Special parameter
+Run `php artisan vendor:publish --provider="Thujohn\Twitter\TwitterServiceProvider"`
+```
+/config/ttwitter.php
+```
+
+# Roadmap
+
+### 2.x 
+
+2.x is in maintenance mode, so we'll continue to add support for new versions, bug fixes, etc but won't be adding new features.
+We'll keep the original package namespace & not break backward compatibility. 
+
+### 3.x 
+
+3.x will be a new major version and will not be backward compatible with 2.x
+The main goals of 3.x are
+
+- Removing our dependency on `tmhoauth` which is extremely outdated
+- Switching to PSR based modules where possible (PSR7 for requests, PSR3 for logging, etc)
+- Take advantage of the newer PHP language features such as typing to make the package more robust
+- Decouple the package from Laravel, as there isn't that much logic specific to the framework and it would be good to
+be able to use it in other frameworks.
+
+We'll release a detailed migration guide to make switching as easy as possible.
+
+# Usage
+
+## Output format
+
+You can choose between three different output formats. By default responses will be returned as objects. To change this,
+use the `format` option in the parameters you pass to any method. 
 
 ```
 format : object|json|array (default:object)
@@ -93,6 +85,19 @@ format : object|json|array (default:object)
 * `destroyUserBanner()` - Removes the uploaded profile banner for the authenticating user. Returns HTTP 200 upon success.
 * `postUserBanner()` - Uploads a profile banner on behalf of the authenticating user. For best results, upload an profile_banner_url node in their Users objects.
 
+### Account Activity (Premium)
+
+* `setWebhook($env, $url)` - Registers a webhook url for all event types in the given environment.
+* `crcHash($crcToken)` - Returns HMAC SHA-256 hash from the given CRC token and consumer secret. You'll need to return this on your webhook ([more info](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/guides/securing-webhooks)).
+* `getWebhooks($env)` - Returns webhook URLs for the given environment (or all environments if none provided), and their statuses for the authenticating app.
+* `updateWebhooks($env, $webhookId)` - Triggers the challenge response check (CRC) for the given enviroments webhook for all activites. If the check is successful, returns true and reenables the webhook by setting its status to valid.
+* `destroyWebhook($env, $webhookId)` - Removes the webhook from the provided application's all activities configuration. Returns true on success.
+* `setSubscriptions($env)` - Subscribes the provided application to all events for the provided environment for all message types. Returns true on success.
+* `getSubscriptions($env)` - Returns true if the provided user context has an active subscription with provided application.
+* `getSubscriptionsCount()` - Returns the count of subscriptions that are currently active on your account for all activities.
+* `getSubscriptionsList($env)` - Returns a list of the current All Activity type subscriptions.
+* `destroyUserSubscriptions($env, $userId)` - Deactivates subscription for the specified user id from the environment. Returns true on success.
+
 ### Block
 
 * `getBlocks()` - Returns a collection of user objects that the authenticating user is blocking.
@@ -102,11 +107,10 @@ format : object|json|array (default:object)
 
 ### DirectMessage
 
-* `getDmsOut()` - Returns the 20 most recent direct messages sent by the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, up to a maximum of 800 outgoing DMs.
-* `getDm()` - Returns a single direct message, specified by an id parameter. Like the /1.1/direct_messages.format request, this method will include the user objects of the sender and recipient.
-* `getDmsIn()` - Returns the 20 most recent direct messages sent to the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, and only the most recent 200 DMs will be available using this endpoint.
+* `getDm()` - Returns a single direct message event, specified by an id parameter.
+* `getDms()` - Returns all Direct Message events (both sent and received) within the last 30 days. Sorted in reverse-chronological order.
 * `destroyDm()` - Destroys the direct message specified in the required ID parameter. The authenticating user must be the recipient of the specified direct message.
-* `postDm()` - Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters and must be a POST. Returns the sent message in the requested format if successful.
+* `postDm()` - Publishes a new message_create event resulting in a Direct Message sent to a specified user from the authenticating user. Returns an event if successful. Supports publishing Direct Messages with optional Quick Reply and media attachment.
 
 ### Favorite
 
@@ -125,7 +129,7 @@ format : object|json|array (default:object)
 * `postUnfollow()` - Allows the authenticating user to unfollow the user specified in the ID parameter.
 * `postFollowUpdate()` - Allows one to enable or disable retweets and device notifications from the specified user.
 * `getFriendships()` - Returns detailed information about the relationship between two arbitrary users.
-* `getFriends()` - Returns a cursored collection of user objects for every user the specified user is following (otherwise known as their “friends”).
+* `getFriends()` - Returns a cursored collection of up to 200 user objects for every user the specified user is following (otherwise known as their “friends”).
 * `getFollowers()` - Returns a cursored collection of user objects for users following the specified user.
 * `getFriendshipsLookup()` - Returns the relationships of the authenticating user to the comma-separated list of up to 100 screen_names or user_ids provided. Values for connections can be: following, following_requested, followed_by, none, blocking, muting.
 
@@ -218,6 +222,12 @@ format : object|json|array (default:object)
 
 ## Helper Functions
 
+Get Last Response: Get the last response from twitter. For example, you can access the headers to check your rate limit quota.
+```php
+$res = Twitter::getLastResponse();
+var_dump($res['headers']); // ['Rate-Limit' => 'Whatever']
+```
+
 Linkify : Transforms URLs, @usernames, hashtags into links.
 The type of $tweet can be object, array or text.
 By sending an object or an array the method will expand links (t.co) too.
@@ -285,7 +295,7 @@ Route::get('/tweetMedia', function()
 ```
 
 Get User Credentials with email.
-```
+```php
 $credentials = Twitter::getCredentials([
     'include_email' => 'true',
 ]);
@@ -377,6 +387,16 @@ Route::get('twitter/logout', ['as' => 'twitter.logout', function(){
 }]);
 ```
 
+Webhook
+>In order to setup webhook successfully, you'll need to return a hash using the CRC token in response from your webhook URL ([more info](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/guides/securing-webhooks)).
+```php
+Route::post('twitter/webhook', ['as' => 'twitter.webhook', function(){
+	if (request()->has('crc_token'))
+		return response()->json(['response_token' => Twitter::crcHash(request()->crc_token)], 200);
+	
+	// Your webhook logic goes here
+}]);
+```
 
 ## Debug
 

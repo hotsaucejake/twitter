@@ -1,85 +1,71 @@
-<?php namespace Thujohn\Twitter;
+<?php
+
+namespace Thujohn\Twitter;
 
 use Illuminate\Support\ServiceProvider;
 
-use Thujohn\Twitter\Twitter;
+class TwitterServiceProvider extends ServiceProvider
+{
+    /**
+     * Indicates if loading of the provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = false;
 
-class TwitterServiceProvider extends ServiceProvider {
+    /**
+     * Bootstrap the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        //
+    }
 
-	/**
-	 * Indicates if loading of the provider is deferred.
-	 *
-	 * @var bool
-	 */
-	protected $defer = false;
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $app = $this->app ?: app();
 
-	/**
-	 * Bootstrap the application events.
-	 *
-	 * @return void
-	 */
-	public function boot()
-	{
-		//
-	}
+        $appVersion = method_exists($app, 'version') ? $app->version() : $app::VERSION;
 
-	/**
-	 * Register the service provider.
-	 *
-	 * @return void
-	 */
-	public function register()
-	{
-		$app = $this->app ?: app();
+        $laravelVersion = substr($appVersion, 0, strpos($appVersion, '.'));
 
-		$appVersion = method_exists($app, 'version') ? $app->version() : $app::VERSION;
+        $isLumen = false;
 
-		$laravelVersion = substr($appVersion, 0, strpos($appVersion, '.'));
+        if (strpos(strtolower($laravelVersion), 'lumen') !== false) {
+            $isLumen = true;
+        }
 
-		$isLumen = false;
+        $this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'ttwitter');
 
-		if (strpos(strtolower($laravelVersion), 'lumen') !== false)
-		{
-			$isLumen = true;
+        if ($isLumen) {
+            $this->publishes([
+                __DIR__.'/../config/config.php' => base_path('config/ttwitter.php'),
+            ]);
+        } else {
+            $this->publishes([
+                __DIR__.'/../../config/config.php' => config_path('ttwitter.php'),
+            ]);
+        }
 
-			$laravelVersion = str_replace('Lumen (', '', $laravelVersion);
-		}
+        $this->app->singleton(Twitter::class, function () use ($app) {
+            return new Twitter($app['config'], $app['session.store']);
+        });
+    }
 
-		if ($laravelVersion == 5)
-		{
-			$this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'ttwitter');
-
-			if ($isLumen)
-			{
-				$this->publishes([
-					__DIR__ . '/../config/config.php' => base_path('config/ttwitter.php'),
-				]);
-			}
-			else
-			{
-				$this->publishes([
-					__DIR__.'/../../config/config.php' => config_path('ttwitter.php'),
-				]);
-			}
-		}
-		else if ($laravelVersion == 4)
-		{
-			$this->package('thujohn/twitter', 'ttwitter', __DIR__.'/../..');
-		}
-
-		$this->app->singleton(Twitter::class, function () use ($app) {
-			return new Twitter($app['config'], $app['session.store']);
-		});
-	}
-
-	/**
-	 * Get the services provided by the provider.
-	 *
-	 * @return array
-	 */
-	public function provides()
-	{
-		return ['ttwitter'];
-	}
-
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return ['ttwitter'];
+    }
 }
