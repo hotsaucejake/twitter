@@ -22,6 +22,7 @@ use Thujohn\Twitter\Traits\TrendTrait;
 use Thujohn\Twitter\Traits\UserTrait;
 use tmhOAuth;
 
+
 class Twitter extends tmhOAuth
 {
     use AccountActivityTrait;
