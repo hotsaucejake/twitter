@@ -7,14 +7,15 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/thujohn/twitter.svg?style=flat-square)](https://packagist.org/packages/thujohn/twitter) 
 ![GitHub Release Date](https://img.shields.io/github/release-date/atymic/twitter?label=latest%20release&style=flat-square)
 
-Twitter API for Laravel 5.5+, 6.x and 7.x
+Twitter API for Laravel 5.5+, 6.x, 7.x & 8.x
 
 You need to create an application and create your access token in the [Application Management](https://apps.twitter.com/).
 
-### Sponsors
+#### Vultr - High Performance Cloud Servers
 
-[![PHP Hosting](https://cdn2.amezmo.net/assets/blue-logo.svg)](https://www.amezmo.com)  
-<sub>It's like forge, but better!</sub> 
+Get $100 free credit to test out Vultr. Fast servers across 17 regions, pefect for hosting Laravel apps from just $2.5/month. 
+
+[![Vultr](https://user-images.githubusercontent.com/50683531/94352986-575e3280-00af-11eb-9cc7-3412b1668530.png)](https://rebrand.ly/vultr100)
 
 ## Installation
 
